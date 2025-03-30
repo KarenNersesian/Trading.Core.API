@@ -15,7 +15,7 @@ namespace Controllers.FinancialLive
 
         public FinancialLiveController( 
             ILogger<FinancialLiveController> logger, 
-            FinancialLiveService financialLiveService)
+            IFinancialLiveService financialLiveService)
         {
             _logger = logger;
             _financialLiveService = financialLiveService;
@@ -24,7 +24,7 @@ namespace Controllers.FinancialLive
         [HttpPost("subscribe")]
         public async Task<SubscribeResponse> Subscribe(SubscribeRequest request) => await _financialLiveService.Subscribe(request);
 
-        [HttpPost("subscribe")]
-        public async Task<UnSubscribeResponse> unSubscribe(UnSubscribeRequest request) => await _financialLiveService.UnSubscribe(request);
+        [HttpPost("unSubscribe")]
+        public async Task<UnSubscribeResponse> UnSubscribe(UnSubscribeRequest request) => await _financialLiveService.UnSubscribe(request);
     }
 }

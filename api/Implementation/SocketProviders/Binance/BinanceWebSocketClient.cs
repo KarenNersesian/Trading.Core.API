@@ -91,18 +91,21 @@ namespace Implementation.SocketProviders.Binance
 
         private async Task OnMessageReceived(string jsonMessage)
         {
-            var update = JsonConvert.DeserializeObject<BinancePriceUpdate>(jsonMessage);
+            var update = JsonConvert.DeserializeObject<BinanceResultMessage>(jsonMessage);
             if (update != null)
             {
-                string instrument = update.Symbol.ToUpper();
-                await _hubContext.Clients.Group(instrument).SendAsync("ReceivePriceUpdate", update.Price);
+                //string instrument = update.Symbol.ToUpper();
+                //await _hubContext.Clients.Group(instrument).SendAsync("ReceivePriceUpdate", update.Price);
+
+                //string instrument = update.Symbol.ToUpper();
+                await _hubContext.Clients.Group("BTCUSD").SendAsync("ReceivePriceUpdate", (decimal)System.Random.Shared.NextDouble());
             }
         }
     }
 
-    public class BinancePriceUpdate
+    public class BinanceResultMessage
     {
-        [JsonProperty("s")] public string Symbol { get; set; }
-        [JsonProperty("p")] public string Price { get; set; }
+        public object result { get; set; }
+        public int id { get; set; }
     }
 }
