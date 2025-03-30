@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Net.WebSockets;
@@ -54,7 +55,8 @@ namespace Implementation.SocketProviders.Binance
                 };
 
                 string message = JsonConvert.SerializeObject(subscribeMessage);
-                await _client.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, CancellationToken.None);
+                var bytes = Encoding.UTF8.GetBytes(message);
+                await _client.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
                 Console.WriteLine($"Subscribed to {instrument}");
             }
         }
@@ -76,36 +78,48 @@ namespace Implementation.SocketProviders.Binance
 
         private async Task ReceiveMessagesAsync()
         {
-            var buffer = new byte[4096];
-
-            while (_client.State == WebSocketState.Open)
+            var buffer = new byte[1024 * 4];
+            try
             {
-                var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                if (result.MessageType == WebSocketMessageType.Text)
+                while (_client.State == WebSocketState.Open)
                 {
-                    string jsonMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    await OnMessageReceived(jsonMessage);
+                    var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
+                    _logger.LogInformation($"Received from Binance: {message}");
+                    //await _hubContext.Clients.All.SendAsync("ReceivePriceUpdate", message);
+
+                    var json = JObject.Parse(message);
+                    string instrument = json["s"]?.ToString();
+                    string price = json["p"]?.ToString();
+
+                    if(!string.IsNullOrEmpty(instrument) && !string.IsNullOrEmpty(price))
+                    {
+                        await _hubContext.Clients.Group(instrument).SendAsync("ReceivePriceUpdate", price);
+                    }
                 }
             }
-        }
-
-        private async Task OnMessageReceived(string jsonMessage)
-        {
-            var update = JsonConvert.DeserializeObject<BinanceResultMessage>(jsonMessage);
-            if (update != null)
+            catch (Exception ex)
             {
-                //string instrument = update.Symbol.ToUpper();
-                //await _hubContext.Clients.Group(instrument).SendAsync("ReceivePriceUpdate", update.Price);
-
-                //string instrument = update.Symbol.ToUpper();
-                await _hubContext.Clients.Group("BTCUSD").SendAsync("ReceivePriceUpdate", (decimal)System.Random.Shared.NextDouble());
+                _logger.LogError($"Error receiving messages from Binance: {ex.Message}");
             }
         }
     }
+
 
     public class BinanceResultMessage
     {
-        public object result { get; set; }
-        public int id { get; set; }
+        public string e { get; set; }
+        public long E { get; set; }
+        public string s { get; set; }
+        public long a { get; set; }
+        public string p { get; set; }
+        public string q { get; set; }
+        public long f { get; set; }
+        public long l { get; set; }
+        public long T { get; set; }
+        public bool m { get; set; }
+        public bool M { get; set; }
     }
+
 }

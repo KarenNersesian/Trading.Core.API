@@ -30,7 +30,7 @@ namespace Implementation.FinancialLive
             request.Validate();
 
             await _hubContext.Groups.AddToGroupAsync(request.SubscribeInfo.ConnectionId.ToString(), request.SubscribeInfo.Instrument.ToUpper());
-            
+
             ActiveSubscriptions.AddOrUpdate(request.SubscribeInfo.Instrument, 1, (_, count) => count + 1);
 
             await _binanceClient.SubscribeToInstrument(request.SubscribeInfo.Instrument);
