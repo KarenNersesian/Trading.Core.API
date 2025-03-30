@@ -14,6 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\api\Controllers\Controllers.csproj" />
+    <ProjectReference Include="..\api\Implementation.Sandbox\Implementation.Sandbox.csproj" />
     <ProjectReference Include="..\api\Implementation\Implementation.csproj" />
   </ItemGroup>
 

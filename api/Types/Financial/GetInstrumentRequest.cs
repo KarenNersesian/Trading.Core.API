@@ -11,8 +11,8 @@ namespace Types.Financial
     [DataContract]
     public class GetInstrumentRequest
     {
-        [DataMember(Name = "symbol")]
-        [JsonPropertyName("symbol")]
-        public string Symbol { get; set; }
+        [DataMember(Name = "instrument")]
+        [JsonPropertyName("instrument")]
+        public string Instrument { get; set; }
     }
 }

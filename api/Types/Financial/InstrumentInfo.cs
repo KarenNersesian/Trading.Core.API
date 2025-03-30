@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 namespace Types.Financial
 {
     [DataContract]
-    public class Instrument
+    public class InstrumentInfo
     {
-        [DataMember(Name = "symbol")]
-        [JsonPropertyName("symbol")]
-        public string Symbol { get; set; }
+        [DataMember(Name = "instrument")]
+        [JsonPropertyName("instrument")]
+        public string Instrument { get; set; }
 
         [DataMember(Name = "price")]
         [JsonPropertyName("price")]

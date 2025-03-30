@@ -13,6 +13,6 @@ namespace Types.Financial
     {
         [DataMember(Name = "instrument")]
         [JsonPropertyName("instrument")]
-        public Instrument Instrument { get; set; }
+        public InstrumentInfo Instrument { get; set; }
     }
 }
