@@ -27,6 +27,8 @@ namespace Implementation.FinancialLive
 
         public async Task<SubscribeResponse> Subscribe(SubscribeRequest request)
         {
+            request.Validate();
+
             await _hubContext.Groups.AddToGroupAsync(request.SubscribeInfo.ConnectionId.ToString(), request.SubscribeInfo.Instrument.ToUpper());
             
             ActiveSubscriptions.AddOrUpdate(request.SubscribeInfo.Instrument, 1, (_, count) => count + 1);
@@ -38,6 +40,8 @@ namespace Implementation.FinancialLive
 
         public async Task<UnSubscribeResponse> UnSubscribe(UnSubscribeRequest request)
         {
+            request.Validate();
+
             request.SubscribeInfo.Instrument = request.SubscribeInfo.Instrument.ToUpper();
 
             await _hubContext.Groups.RemoveFromGroupAsync(request.SubscribeInfo.ConnectionId.ToString(), request.SubscribeInfo.Instrument);
