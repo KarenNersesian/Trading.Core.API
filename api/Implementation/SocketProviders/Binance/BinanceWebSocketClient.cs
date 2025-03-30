@@ -1,87 +1,108 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace Implementation.SocketProviders.Binance
 {
     public class BinanceWebSocketClient
     {
-        private readonly ClientWebSocket _clientWebSocket = new();
-        private readonly Uri _uri = new("wss://stream.binance.com:443/ws/btcusdt");
         private readonly IHubContext<PriceHub> _hubContext;
+        private ClientWebSocket _client;
+        private readonly Uri _binanceUri = new Uri("wss://stream.binance.com:443/ws/btcusdt");
+        private readonly ConcurrentDictionary<string, bool> _subscriptions = new();
         private readonly ILogger<BinanceWebSocketClient> _logger;
-        private string? _latestPrice;
 
         public BinanceWebSocketClient(IHubContext<PriceHub> hubContext, ILogger<BinanceWebSocketClient> logger)
         {
             _hubContext = hubContext;
+            _client = new ClientWebSocket();
             _logger = logger;
         }
 
-        public async void Connect()
+        public async Task ConnectAsync()
         {
             try
             {
-                await _clientWebSocket.ConnectAsync(_uri, CancellationToken.None);
-                await SendMessageAsync(new
-                {
-                    method = "SUBSCRIBE",
-                    @params = new[] { "btcusdt@aggTrade" },
-                    id = 1
-                });
+                _client = new ClientWebSocket();
+                await _client.ConnectAsync(_binanceUri, CancellationToken.None);
                 _logger.LogInformation("Connected to Binance WebSocket.");
                 _ = Task.Run(ReceiveMessagesAsync);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to connect to Binance WebSocket: {ex.Message}");
+                Console.WriteLine($"WebSocket error: {ex.Message}. Reconnecting in 5 sec...");
+                await Task.Delay(5000);
             }
         }
 
-        private async Task SendMessageAsync(object message)
+        public async Task SubscribeToInstrument(string instrument)
         {
-            try
+            if (!_subscriptions.ContainsKey(instrument))
             {
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(message);
-                var bytes = Encoding.UTF8.GetBytes(json);
-                await _clientWebSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                _subscriptions[instrument] = true;
+                var subscribeMessage = new
+                {
+                    method = "SUBSCRIBE",
+                    @params = new[] { $"{instrument.ToLower()}@aggTrade" },
+                    id = 1
+                };
+
+                string message = JsonConvert.SerializeObject(subscribeMessage);
+                await _client.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, CancellationToken.None);
+                Console.WriteLine($"Subscribed to {instrument}");
             }
-            catch (Exception ex)
+        }
+
+        public async Task UnsubscribeFromInstrument(string instrument)
+        {
+            if (_client.State == WebSocketState.Open)
             {
-                _logger.LogError($"Failed to send message to Binance: {ex.Message}");
+                var unsubscribeMessage = new
+                {
+                    method = "UNSUBSCRIBE",
+                    @params = new[] { $"{instrument.ToLower()}@aggTrade" },
+                    id = 1
+                };
+                string message = JsonConvert.SerializeObject(unsubscribeMessage);
+                await _client.SendAsync(Encoding.UTF8.GetBytes(message), WebSocketMessageType.Text, true, CancellationToken.None);
             }
         }
 
         private async Task ReceiveMessagesAsync()
         {
-            var buffer = new byte[1024 * 4];
-            try
+            var buffer = new byte[4096];
+
+            while (_client.State == WebSocketState.Open)
             {
-                while (_clientWebSocket.State == WebSocketState.Open)
+                var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (result.MessageType == WebSocketMessageType.Text)
                 {
-                    var result = await _clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    _latestPrice = message;
-                    _logger.LogInformation($"Received from Binance: {message}");
-                    await _hubContext.Clients.All.SendAsync("ReceivePriceUpdate", message);
+                    string jsonMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    await OnMessageReceived(jsonMessage);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error receiving messages from Binance: {ex.Message}");
             }
         }
 
-        public string? GetLatestPrice(string instrument)
+        private async Task OnMessageReceived(string jsonMessage)
         {
-            return _latestPrice;
+            var update = JsonConvert.DeserializeObject<BinancePriceUpdate>(jsonMessage);
+            if (update != null)
+            {
+                string instrument = update.Symbol.ToUpper();
+                await _hubContext.Clients.Group(instrument).SendAsync("ReceivePriceUpdate", update.Price);
+            }
         }
     }
 
+    public class BinancePriceUpdate
+    {
+        [JsonProperty("s")] public string Symbol { get; set; }
+        [JsonProperty("p")] public string Price { get; set; }
+    }
 }

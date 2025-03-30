@@ -28,6 +28,6 @@ app.MapControllers();
 
 app.MapHub<PriceHub>("/priceHub");
 var binanceClient = app.Services.GetRequiredService<BinanceWebSocketClient>();
-binanceClient.Connect();
+await binanceClient.ConnectAsync();
 
 app.Run();

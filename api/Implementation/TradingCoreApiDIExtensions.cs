@@ -1,12 +1,8 @@
 ﻿using Implementation.SocketProviders.Binance;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
-using System.Runtime.CompilerServices;
+using Interfaces;
+using Implementation.Financial;
+using Implementation.FinancialLive;
 
 namespace Implementation
 {
@@ -17,6 +13,8 @@ namespace Implementation
             services.AddSignalR();
             services.AddSingleton<PriceHub>();
             services.AddSingleton<BinanceWebSocketClient>();
+            services.AddScoped<IFinancialService, FinancialService>();
+            services.AddScoped<IFinancialLiveService, FinancialLiveService>();
 
             return services;
         }

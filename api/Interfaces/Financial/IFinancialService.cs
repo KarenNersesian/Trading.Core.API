@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Types.Financial;
 
-namespace Interfaces.Financial
+namespace Interfaces
 {
     public interface IFinancialService
     {
