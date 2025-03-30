@@ -21,10 +21,10 @@ namespace Controllers.FinancialLive
             _financialLiveService = financialLiveService;
         }
 
-        [HttpPost("subscribe")]
-        public async Task<SubscribeResponse> Subscribe(SubscribeRequest request) => await _financialLiveService.Subscribe(request);
+        //[HttpPost("subscribe")]
+        //public async Task<SubscribeResponse> Subscribe(SubscribeRequest request) => await _financialLiveService.Subscribe(request);
 
-        [HttpPost("unSubscribe")]
-        public async Task<UnSubscribeResponse> UnSubscribe(UnSubscribeRequest request) => await _financialLiveService.UnSubscribe(request);
+        //[HttpPost("unSubscribe")]
+        //public async Task<UnSubscribeResponse> UnSubscribe(UnSubscribeRequest request) => await _financialLiveService.UnSubscribe(request);
     }
 }

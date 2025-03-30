@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementation", "api\Imple
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Implementation.Sandbox", "api\Implementation.Sandbox\Implementation.Sandbox.csproj", "{BBF25668-6B42-4B2F-A1DB-35C8EA0379EB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{414E05DA-0910-4C56-947E-529179AEB86D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Client", "tests\Simple.Client\Simple.Client.csproj", "{E5BE1328-5C18-4D8C-B4F1-A94D6C60D4AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +51,10 @@ Global
 		{BBF25668-6B42-4B2F-A1DB-35C8EA0379EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBF25668-6B42-4B2F-A1DB-35C8EA0379EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBF25668-6B42-4B2F-A1DB-35C8EA0379EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5BE1328-5C18-4D8C-B4F1-A94D6C60D4AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5BE1328-5C18-4D8C-B4F1-A94D6C60D4AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5BE1328-5C18-4D8C-B4F1-A94D6C60D4AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5BE1328-5C18-4D8C-B4F1-A94D6C60D4AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -57,5 +65,6 @@ Global
 		{1C8D0A4E-E7B3-4C90-95DE-DFE880A22791} = {117982B5-FF75-4803-8F8F-AC5A4B0E7FDF}
 		{3B5FF590-AF4A-4C06-B12A-BE5B08512347} = {117982B5-FF75-4803-8F8F-AC5A4B0E7FDF}
 		{BBF25668-6B42-4B2F-A1DB-35C8EA0379EB} = {117982B5-FF75-4803-8F8F-AC5A4B0E7FDF}
+		{E5BE1328-5C18-4D8C-B4F1-A94D6C60D4AC} = {414E05DA-0910-4C56-947E-529179AEB86D}
 	EndGlobalSection
 EndGlobal

@@ -35,6 +35,16 @@ namespace Implementation
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, instrument);
             await Clients.Caller.SendAsync("Unsubscribed", instrument);
             _logger.LogInformation($"Client {Context.ConnectionId} unsubscribed from {instrument}");
+
+            if (ActiveSubscriptions.TryGetValue(instrument, out int count) && count > 1)
+            {
+                ActiveSubscriptions[instrument] = count - 1;
+            }
+            else
+            {
+                ActiveSubscriptions.TryRemove(instrument, out _);
+                await _binanceClient.UnsubscribeFromInstrument(instrument);
+            }
         }
     }
 }
