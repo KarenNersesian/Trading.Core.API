@@ -9,5 +9,12 @@ namespace Types
     public class TradingCoreApiOptions
     {
         public bool UseSandbox { get; set; }
+        public Tiigo Tiigo { get; set; }
+    }
+
+    public class Tiigo
+    {
+        public string ApiKey { get; set; }
+        public string BaseUrl { get; set; }
     }
 }

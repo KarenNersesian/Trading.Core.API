@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Types;
 using Types.Financial;
 
 namespace Implementation.Sandbox.Financial
@@ -18,18 +20,9 @@ namespace Implementation.Sandbox.Financial
             { "BTCUSD", 65000.00m }
         };
 
-        public FinancialService(ILogger<FinancialService> logger) : base(logger)
+        public FinancialService(ILogger<FinancialService> logger, IOptions<TradingCoreApiOptions> options) : base(logger, options)
         {
 
-        }
-
-        public override async Task<GetInstrumentResponse> GetGetInstrument(GetInstrumentRequest request)
-        {
-            if (_prices.TryGetValue(request.Instrument.ToUpper(), out var price))
-                return new GetInstrumentResponse{ Instrument = new InstrumentInfo() { Price = price, Instrument = request.Instrument } };
-
-            // This is a sandbox implementation, need to throw more rebust exception
-            throw new Exception();
         }
 
         public override async Task<GetInstrumentsResponse> GetGetInstruments(GetInstrumentsRequest request)
